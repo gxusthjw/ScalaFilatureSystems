@@ -17,7 +17,8 @@ trait TQuadraticVertexLogistic extends TUnivariateFunction
   val logisticK: Double
   val logisticX0: Double
   val quadraticVertexLogisticD: Double
-  override val formula: String = s"($quadraticVertexA*pow(x-$quadraticVertexB,2)+$quadraticVertexC)*$logisticM / (1 + exp(-$logisticK*(x-$logisticX0))) + $quadraticVertexLogisticD"
+
+  override val formula: String = s"($quadraticVertexA * pow(x - $quadraticVertexB,2) + $quadraticVertexC) * $logisticM / (1 + exp(-$logisticK*(x - $logisticX0))) + $quadraticVertexLogisticD"
   val quadraticVertex: TQuadraticVertex = QuadraticVertex(quadraticVertexA, quadraticVertexB, quadraticVertexC)
   val logistic: TLogistic = Logistic(logisticM, logisticK, logisticX0)
 

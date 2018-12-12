@@ -28,7 +28,8 @@ trait TLogistic extends TUnivariateFunction
   val logisticK: Double = 1
   val logisticX0: Double = 0
 
-  //if (logisticM == 0) throw new IllegalArgumentException(s"Expected the property {logisticM != 0},but get {logisticM = $logisticM}")
+  if (logisticM == 0) throw new IllegalArgumentException(
+    s"Expected the property {logisticM != 0},but get {logisticM = $logisticM}")
 
   /**
     * The string form of analysis formula of univariate function.
@@ -77,60 +78,90 @@ trait TLogistic extends TUnivariateFunction
 }
 
 object TLogistic {
+  /**
+    * lexp(x) = exp(-k*(x-x0))
+    */
   def logisticExp(logisticM: Double = 1,
                   logisticK: Double = 1,
                   logisticX0: Double = 0)(x: Double): Double = {
     exp(-logisticK * (x - logisticX0))
   }
 
+  /**
+    * lexpp1(x) = 1 + exp(-k*(x-x0))
+    */
   def logisticExpPlusOne(logisticM: Double = 1,
                          logisticK: Double = 1,
                          logisticX0: Double = 0)(x: Double): Double = {
     1 + logisticExp(logisticM, logisticK, logisticX0)(x)
   }
 
+  /**
+    * lexpp1p2(x) = pow(1 + exp(-k*(x-x0)),2)
+    */
   def logisticExpPlusOnePow2(logisticM: Double = 1,
                              logisticK: Double = 1,
                              logisticX0: Double = 0)(x: Double): Double = {
     pow(logisticExpPlusOne(logisticM, logisticK, logisticX0)(x), 2)
   }
 
+  /**
+    * lexpp1pn1(x) = pow(1 + exp(-k*(x-x0)),-1) = 1/(1 + exp(-k*(x-x0)))
+    */
   def logisticExpPlusOnePowN1(logisticM: Double = 1,
                               logisticK: Double = 1,
                               logisticX0: Double = 0)(x: Double): Double = {
     1 / logisticExpPlusOne(logisticM, logisticK, logisticX0)(x)
   }
 
+  /**
+    * l(x) = m / (1 + exp(-k*(x-x0)))
+    */
   def logistic(logisticM: Double = 1,
                logisticK: Double = 1,
                logisticX0: Double = 0)(x: Double): Double = {
     logisticM / logisticExpPlusOne(logisticM, logisticK, logisticX0)(x)
   }
 
+  /**
+    * il(x) = m * (x+log(1 + exp(-k*(x-x0)))/k)
+    */
   def logisticIntegrate(logisticM: Double = 1,
                         logisticK: Double = 1,
                         logisticX0: Double = 0)(x: Double): Double = {
     logisticM * (x + log(logisticExpPlusOne(logisticM, logisticK, logisticX0)(x)) / logisticK)
   }
 
+  /**
+    * dl(x)
+    */
   def logisticDerivative(logisticM: Double = 1,
                          logisticK: Double = 1,
                          logisticX0: Double = 0)(x: Double): Double = {
     (logisticM * logisticK * logisticExp(logisticM, logisticK, logisticX0)(x)) / logisticExpPlusOnePow2(logisticM, logisticK, logisticX0)(x)
   }
 
+  /**
+    * dlm(x)
+    */
   def logisticDerivativeM(logisticM: Double = 1,
                           logisticK: Double = 1,
                           logisticX0: Double = 0)(x: Double): Double = {
     logisticExpPlusOnePowN1(logisticM, logisticK, logisticX0)(x)
   }
 
+  /**
+    * dlk(x)
+    */
   def logisticDerivativeK(logisticM: Double = 1,
                           logisticK: Double = 1,
                           logisticX0: Double = 0)(x: Double): Double = {
     -(logisticM * (-x + logisticX0) * logisticExp(logisticM, logisticK, logisticK)(x)) / logisticExpPlusOnePow2(logisticM, logisticK, logisticX0)(x)
   }
 
+  /**
+    * dlx0(x)
+    */
   def logisticDerivativeX0(logisticM: Double = 1,
                            logisticK: Double = 1,
                            logisticX0: Double = 0)(x: Double): Double = {
@@ -150,7 +181,6 @@ object TLogistic {
         logisticDerivativeX0(parameters(0), parameters(1), parameters(2))(x))
     }
 
-
   }
 
   def checkParameter(parameters: Double*): Unit = {
@@ -158,8 +188,8 @@ object TLogistic {
       s"Expected the parameter {parameters != null},but got {parameters = null}}")
     if (parameters.length != 3) throw new IllegalArgumentException(
       s"Expected the parameter {parameters.length == 3},but got {parameters.length = ${parameters.length}}")
-    //if (parameters.head == 0) throw new IllegalArgumentException(
-    //  s"Expected the parameter {parameters(0) != 0},but got {parameters(0) = ${parameters.head}}")
+    if (parameters.head == 0) throw new IllegalArgumentException(
+      s"Expected the parameter {parameters(0) != 0},but got {parameters(0) = ${parameters.head}}")
   }
 
   def apply(logisticM: Double = 1,

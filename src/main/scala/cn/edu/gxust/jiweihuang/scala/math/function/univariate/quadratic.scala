@@ -4,17 +4,19 @@ package cn.edu.gxust.jiweihuang.scala.math.function.univariate
   * The trait [[TQuadratic]] is used for
   * representing quadratic function.
   *
+  * @see TUnivariateFunction
+  * @see TUnivariateInverseFunction
   * @see TUnivariateDerivativeFunction
   * @see TUnivariateDifferentiableFunction
   * @see TUnivariateIntegrableFunction
   * @see TUnivariateIntegrateFunction
   */
 trait TQuadratic extends TUnivariateFunction
-  with TUnivariateDifferentiableFunction
-  with TUnivariateIntegrableFunction
+  with TUnivariateInverseFunction
   with TUnivariateDerivativeFunction
+  with TUnivariateDifferentiableFunction
   with TUnivariateIntegralFunction
-  with TUnivariateInverseFunction {
+  with TUnivariateIntegrableFunction {
 
   /**
     * The vertex coordinates (x,y) of quadratic function
@@ -99,9 +101,6 @@ trait TQuadraticVertex extends TQuadratic {
     */
   override val formula: String = s"$quadraticVertexA * pow(x - $quadraticVertexB, 2) + $quadraticVertexC"
 
-  /**
-    * q(x) = a * pow(x-b,2) + c
-    */
   override def value(x: Double): Double = {
     TQuadraticVertex.quadraticVertex(quadraticVertexA, quadraticVertexB, quadraticVertexC)(x)
   }
@@ -115,9 +114,6 @@ trait TQuadraticVertex extends TQuadratic {
       (quadraticVertexA * quadraticVertexB + sqrt(quadraticVertexA * (x - quadraticVertexC))) / quadraticVertexA)
   }
 
-  /**
-    * iq(x) = a * pow(b,2) * x + c * x - a * b * pow(x,2)  +  (a * pow(x,3)) / 3
-    */
   override def integrate(x: Double): Double = {
     TQuadraticVertex.quadraticVertexIntegrate(quadraticVertexA, quadraticVertexB, quadraticVertexC)(x)
   }
@@ -145,39 +141,56 @@ trait TQuadraticVertex extends TQuadratic {
 
 
 object TQuadraticVertex {
-
+  /**
+    * q(x) = a * pow(x-b,2) + c
+    */
   def quadraticVertex(quadraticVertexA: Double = 1,
                       quadraticVertexB: Double = 0,
                       quadraticVertexC: Double = 0)(x: Double): Double = {
     quadraticVertexA * pow(x - quadraticVertexB, 2) + quadraticVertexC
   }
 
+  /**
+    * dq(x) = 2 * a * (x-b)
+    */
   def quadraticVertexDerivative(quadraticVertexA: Double = 1,
                                 quadraticVertexB: Double = 0,
                                 quadraticVertexC: Double = 0)(x: Double): Double = {
     2 * quadraticVertexA * (x - quadraticVertexB)
   }
 
+  /**
+    * iq(x) = a * pow(b,2) * x + c * x - a * b * pow(x,2)  +  (a * pow(x,3)) / 3
+    */
   def quadraticVertexIntegrate(quadraticVertexA: Double = 1,
                                quadraticVertexB: Double = 0,
                                quadraticVertexC: Double = 0)(x: Double): Double = {
-    quadraticVertexA * pow(quadraticVertexB, 2) * x +
-      quadraticVertexC * x - quadraticVertexA * quadraticVertexB * pow(x, 2) +
+    quadraticVertexA * pow(quadraticVertexB, 2) * x + quadraticVertexC * x -
+      quadraticVertexA * quadraticVertexB * pow(x, 2) +
       quadraticVertexA * pow(x, 3) / 3
   }
 
+  /**
+    * dqa(x) = pow(x-b,2)
+    */
   def quadraticVertexDerivativeA(quadraticVertexA: Double = 1,
                                  quadraticVertexB: Double = 0,
                                  quadraticVertexC: Double = 0)(x: Double): Double = {
     pow(x - quadraticVertexB, 2)
   }
 
+  /**
+    * dqb(x) = -2 * a * (x-b)
+    */
   def quadraticVertexDerivativeB(quadraticVertexA: Double = 1,
                                  quadraticVertexB: Double = 0,
                                  quadraticVertexC: Double = 0)(x: Double): Double = {
     -2 * quadraticVertexA * (x - quadraticVertexB)
   }
 
+  /**
+    * dqc(x) = 1
+    */
   def quadraticVertexDerivativeC(quadraticVertexA: Double = 1,
                                  quadraticVertexB: Double = 0,
                                  quadraticVertexC: Double = 0)(x: Double): Double = 1
