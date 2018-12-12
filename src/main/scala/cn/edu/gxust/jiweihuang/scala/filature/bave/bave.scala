@@ -10,10 +10,10 @@ trait Bave {
 
 trait TQVLBaveModel extends Bave with TQuadraticVertexLogistic {
 
-  val modelBaveLength: Double
-  val initialSize: Double
-  val terminalSize: Double
-  val maxSizePos: Double
+  val modelBaveLength: Double = 1200
+  val initialSize: Double = 3.5
+  val terminalSize: Double = 1.8
+  val maxSizePos: Double = 200
 
   override val quadraticVertexA: Double = _
   override val quadraticVertexB: Double = _
@@ -23,7 +23,9 @@ trait TQVLBaveModel extends Bave with TQuadraticVertexLogistic {
   override val logisticX0: Double = _
   override val quadraticVertexLogisticD: Double = _
 
-  override val baveLength: Double = modelBaveLength
+  var lowerPos: Double = 0
+  var upperPos: Double = modelBaveLength
+  override val baveLength: Double = upperPos - lowerPos
 
   override def baveSize(pos: Double): Double = {
     value(pos)
