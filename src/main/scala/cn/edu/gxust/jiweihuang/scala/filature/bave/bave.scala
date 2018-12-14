@@ -39,10 +39,40 @@ trait TQVLBaveModel extends Bave with TQuadraticVertexLogistic {
 object TQVLBaveModel {
 
   class Parametric extends ParametricUnivariateFunction {
-    override def value(x: Double, parameters: Double*): Double = ???
+    override def value(x: Double, parameters: Double*): Double = {
+      val L = parameters(0)
+      val s = parameters(1)
+      val t = parameters(2)
+      val m = parameters(3)
+      ((1 + exp(4 * m / (L - m))) * (s - t) * pow(x - L, 2) / ((1 + exp(-4 * (x - m) / (L - m))) * pow(L, 2))) + t
+    }
 
-    override def gradient(x: Double, parameters: Double*): Array[Double] = ???
+    override def gradient(x: Double, parameters: Double*): Array[Double] = {
+      val L = parameters(0)
+      val s = parameters(1)
+      val t = parameters(2)
+      val m = parameters(3)
+      val make_array: Array[Double] = new Array[Double](4)
+      val tem1 = -2 * (1 + exp(4 * m / (L - m))) * (s - t) * (x - L) / (1 + exp(-4 * (x - m) / (L - m)))
+      make_array(0) = {
+        (tem1 / pow(L, 2)) + (tem1 / pow(L, 3)) +
+          ((-4 * exp(4 * m / (L - m)) * m * (s - t) * pow(x - L, 2)) / ((1 + exp(-4 * (x - m) / (L - m))) * pow(L, 2) * pow(L - m, 2))) +
+          (-4 * exp(-4 * (x - m) / (L - m)) * (1 + exp(4 * m / (L - m))) * (s - t) * pow(x - L, 2) * (x - m)) / (pow(1 + exp(-4 * (x - m) / (L - m)), 2) * pow(L, 2) * pow(L - m, 2))
+      }
+      make_array(1) = {
+        (1 + exp(4 * m / (L - m))) * pow(L - x, 2) / (pow(L, 2) * (1 + exp(4 * (m - x) / (L - m))))
+      }
+      make_array(2) = {
+        1 - make_array(1)
+      }
+      make_array(3) = {
+        4 * exp(4 * (x + m) / (L - m)) * (s - t) * pow(x - L, 2) * ((exp(4 * x / (L - m)) - 1) * L + x + exp(4 * m / (L - m))) / (pow(L, 2) * pow(L - m, 2) * (exp(4 * m / (L - m)) + exp(4 * x / (L - m))))
+      }
+      return make_array
+    }
   }
+
+
 
 }
 
