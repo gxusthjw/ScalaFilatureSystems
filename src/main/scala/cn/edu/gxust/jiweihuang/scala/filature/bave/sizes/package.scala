@@ -1,6 +1,7 @@
 package cn.edu.gxust.jiweihuang.scala.filature.bave
 
 import cn.edu.gxust.jiweihuang.scala.utils._
+import org.hipparchus.linear._
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -22,24 +23,30 @@ package object sizes {
     def apply(index: Int): Double = data(index)
 
     //Stepwise auto-regressive model
-    def slopeStepwise: Double = {
+    def slope: Double = {
       var sum: Double = 0.0
       for (i <- 0 until length) sum = sum + i * data(i)
       (12.0 * sum - 6.0 * (length - 1.0) * average * length) / ((length - 1.0) * length * (length + 1.0))
     }
 
-    def lineStepwise: List[Double] = {
+    def line: List[Double] = {
       val make_array = new Array[Double](length)
       for (i <- 0 until length) {
-        make_array(i) = average + slopeStepwise * (i - (length - 1) / 2.0)
+        make_array(i) = average + slope * (i - (length - 1) / 2.0)
       }
       make_array.toList
     }
 
-    def lineSubStepwise: List[Double] = {
-      (for (i <- 0 until length) yield data(i) - lineStepwise(i)).toList
+    def subLine: List[Double] = {
+      (for (i <- 0 until length) yield data(i) - line(i)).toList
     }
 
+    //Auto-covariance Function
+    def acvf(r: Int, m: Int): Double = {
+      var sum: Double = 0
+      for (i <- 0 until length - m) sum = sum + subLine(i) * subLine(i + r)
+      sum
+    }
 
   }
 
@@ -83,10 +90,11 @@ package object sizes {
     }
   }
 
-  class SizesGroup(val name: String) {
+  class SizesGroup(val name: String) extends mutable.Iterable[Sizes] {
     private val sizesMap = new mutable.TreeMap[Int, Sizes]()
     SizesGroup.counter = 0
-    val count: Int = sizesMap.size
+
+    def count: Int = sizesMap.size
 
     def +=(data: String, separator: String = "\\s+", ignore: Boolean = false): SizesGroup = {
       sizesMap.+=((SizesGroup.counter, Sizes(SizesGroup.counter, data, separator, ignore)))
@@ -105,6 +113,71 @@ package object sizes {
       var tem: String = "\n"
       sizesMap.foreach(s => tem = tem + s + "\n")
       s"SizesGroup($name)$tem"
+    }
+
+    override def iterator: Iterator[Sizes] = sizesMap.valuesIterator
+
+    //Auto-covariance Function
+    def acvf(r: Int, m: Int): Double = {
+      var sum: Double = 0.0
+      for (sizes <- this) sum = sum + sizes.acvf(r, m)
+      sum / count
+    }
+
+    def acvfStringArray(k: Int): Array[String] = {
+      val make_array = new Array[String](k)
+      for (i <- 1 to k) make_array(i - 1) = s"acvf($i, $i)"
+      make_array
+    }
+
+    def acvfArray(k: Int): Array[Double] = {
+      val make_array = new Array[Double](k)
+      for (i <- 1 to k) make_array(i - 1) = acvf(i, i)
+      make_array
+    }
+
+    def acvfVector(k: Int): RealVector = new ArrayRealVector(acvfArray(k), false)
+
+    def acvfStringMatrix(k: Int): Array[Array[String]] = {
+      val dm = Array.ofDim[String](k, k)
+      for (i <- 0 to k - 1) {
+        for (j <- i to k - 1) {
+          dm(i)(j) = s"acvf(${j - i}, ${j + 1})"
+        }
+        for (h <- 0 until i) {
+          dm(i)(h) = s"acvf(${i - h}, ${i + 1})"
+        }
+      }
+      dm
+    }
+
+    def acvf2DArray(k: Int): Array[Array[Double]] = {
+      val make_2darray = Array.ofDim[Double](k, k)
+      for (i <- 0 until k) {
+        for (j <- i until k) {
+          make_2darray(i)(j) = acvf(j - i, j + 1)
+        }
+        for (h <- 0 until i) {
+          make_2darray(i)(h) = acvf(i - h, i + 1)
+        }
+      }
+      make_2darray
+    }
+
+    def acvfMatrix(k: Int): RealMatrix = new Array2DRowRealMatrix(acvf2DArray(k), false)
+
+    def coefVector(k: Int): RealVector = {
+      val coefficients = acvfMatrix(k)
+      val constants = acvfVector(k)
+      val solver: DecompositionSolver = new LUDecomposition(coefficients).getSolver()
+      solver.solve(constants)
+    }
+
+    def coefArray(k: Int): Array[Double] = {
+      val make_array = new Array[Double](k)
+      val coef_vector = coefVector(k)
+      for (i <- 0 until k) make_array(i) = coef_vector.getEntry(i)
+      make_array
     }
   }
 
