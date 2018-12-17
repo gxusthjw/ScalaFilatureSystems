@@ -4,6 +4,12 @@ package object univariate {
 
   import org.hipparchus.analysis.UnivariateFunction
 
+  import org.hipparchus.analysis.differentiation.{
+    DSFactory,
+    UnivariateDifferentiableFunction
+  }
+  import org.hipparchus.analysis.integration._
+
   trait TUnivariateFunction extends UnivariateFunction
     with Serializable {
     val formula: String
@@ -17,10 +23,6 @@ package object univariate {
     def derivative(x: Double): Double
   }
 
-  import org.hipparchus.analysis.differentiation.{
-    DSFactory,
-    UnivariateDifferentiableFunction
-  }
 
   trait TUnivariateDifferentiableFunction extends TUnivariateFunction
     with UnivariateDifferentiableFunction {
@@ -41,7 +43,6 @@ package object univariate {
       integrate(upperX) - integrate(lowerX)
   }
 
-  import org.hipparchus.analysis.integration._
 
   trait TUnivariateIntegrableFunction
     extends TUnivariateFunction {

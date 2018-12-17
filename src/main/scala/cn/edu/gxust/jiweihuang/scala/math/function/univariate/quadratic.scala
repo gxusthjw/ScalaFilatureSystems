@@ -1,5 +1,11 @@
 package cn.edu.gxust.jiweihuang.scala.math.function.univariate
 
+
+import org.hipparchus.analysis.ParametricUnivariateFunction
+import org.hipparchus.analysis.differentiation.DerivativeStructure
+
+import scala.math._
+
 /**
   * The trait [[TQuadratic]] is used for
   * representing quadratic function.
@@ -44,11 +50,6 @@ trait TQuadratic extends TUnivariateFunction
     */
   val xIntersectionNum: Int
 }
-
-import org.hipparchus.analysis.ParametricUnivariateFunction
-import org.hipparchus.analysis.differentiation.DerivativeStructure
-
-import scala.math._
 
 /**
   * <p>reference: https://en.wikipedia.org/wiki/Quadratic_function</p>
@@ -109,9 +110,8 @@ trait TQuadraticVertex extends TQuadratic {
     x.subtract(quadraticVertexB).pow(2).multiply(quadraticVertexA).add(quadraticVertexC)
   }
 
-  override def inverse(x: Double): Array[Double] = {
-    Array((quadraticVertexA * quadraticVertexB - sqrt(quadraticVertexA * (x - quadraticVertexC))) / quadraticVertexA,
-      (quadraticVertexA * quadraticVertexB + sqrt(quadraticVertexA * (x - quadraticVertexC))) / quadraticVertexA)
+  override def inverse(y: Double): Array[Double] = {
+    TQuadraticVertex.quadraticVertexInverse(quadraticVertexA, quadraticVertexB, quadraticVertexC)(y)
   }
 
   override def integrate(x: Double): Double = {
@@ -141,6 +141,7 @@ trait TQuadraticVertex extends TQuadratic {
 
 
 object TQuadraticVertex {
+
   /**
     * q(x) = a * pow(x-b,2) + c
     */
@@ -148,6 +149,23 @@ object TQuadraticVertex {
                       quadraticVertexB: Double = 0,
                       quadraticVertexC: Double = 0)(x: Double): Double = {
     quadraticVertexA * pow(x - quadraticVertexB, 2) + quadraticVertexC
+  }
+
+  /**
+    * qi1(x) = b - sqrt(a*(y-c))/a
+    * qi2(x) = b + sqrt(a*(y-c))/a
+    */
+  def quadraticVertexInverse(quadraticVertexA: Double = 1,
+                             quadraticVertexB: Double = 0,
+                             quadraticVertexC: Double = 0)(y: Double): Array[Double] = {
+    val tem = quadraticVertexA * (y - quadraticVertexC)
+    if (tem < 0) {
+      new Array[Double](0)
+    } else if (tem == 0) {
+      Array[Double](quadraticVertexB)
+    } else {
+      Array[Double](quadraticVertexB - sqrt(tem) / quadraticVertexA, quadraticVertexB + sqrt(tem) / quadraticVertexA)
+    }
   }
 
   /**
