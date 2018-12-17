@@ -40,5 +40,8 @@ object sizes extends App {
   println(s"sizes11 = ${sizes11}")
   val sizes12 = Sizes("12  2.5   2.6 s 2.8  2.98  3.0", ignore = true)
   println(s"sizes12 = ${sizes12}")
+
+
+
 }
 
