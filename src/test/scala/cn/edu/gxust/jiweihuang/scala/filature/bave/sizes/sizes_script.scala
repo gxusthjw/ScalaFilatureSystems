@@ -41,7 +41,13 @@ object sizes extends App {
   val sizes12 = Sizes("12  2.5   2.6 s 2.8  2.98  3.0", ignore = true)
   println(s"sizes12 = ${sizes12}")
 
-
-
+  println(s"sizes0.length = ${sizes0.length}")
+  println(s"sizes0.sum = ${sizes0.sum}")
+  println(s"sizes0.average = ${sizes0.average}")
+  println(s"sizes0.slopeStepwise = ${sizes0.slopeStepwise}")
+  println(s"sizes0.lineStepwise = ${sizes0.lineStepwise}")
+  println(s"sizes0.lineStepwise.sum = ${sizes0.lineStepwise.sum}")
+  println(s"sizes0.lineSubStepwise = ${sizes0.lineSubStepwise}")
+  println(s"sizes0.lineSubStepwise.sum = ${sizes0.lineSubStepwise.sum}")
 }
 

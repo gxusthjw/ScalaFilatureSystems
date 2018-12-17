@@ -7,5 +7,4 @@ object sizes_group extends App {
   println(s"SizesGroup.GXHX10050 = ${SizesGroup.GXHX10050}")
   println(s"SizesGroup.GXLC50210 = ${SizesGroup.GXLC50210}")
   println(s"SizesGroup.GXRA50200 = ${SizesGroup.GXRA50200}")
-
 }

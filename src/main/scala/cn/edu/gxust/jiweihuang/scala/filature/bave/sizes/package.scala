@@ -20,6 +20,27 @@ package object sizes {
     override def toString: String = s"Sizes($id,$data)"
 
     def apply(index: Int): Double = data(index)
+
+    //Stepwise auto-regressive model
+    def slopeStepwise: Double = {
+      var sum: Double = 0.0
+      for (i <- 0 until length) sum = sum + i * data(i)
+      (12.0 * sum - 6.0 * (length - 1.0) * average * length) / ((length - 1.0) * length * (length + 1.0))
+    }
+
+    def lineStepwise: List[Double] = {
+      val make_array = new Array[Double](length)
+      for (i <- 0 until length) {
+        make_array(i) = average + slopeStepwise * (i - (length - 1) / 2.0)
+      }
+      make_array.toList
+    }
+
+    def lineSubStepwise: List[Double] = {
+      (for (i <- 0 until length) yield data(i) - lineStepwise(i)).toList
+    }
+
+
   }
 
 
@@ -65,6 +86,7 @@ package object sizes {
   class SizesGroup(val name: String) {
     private val sizesMap = new mutable.TreeMap[Int, Sizes]()
     SizesGroup.counter = 0
+    val count: Int = sizesMap.size
 
     def +=(data: String, separator: String = "\\s+", ignore: Boolean = false): SizesGroup = {
       sizesMap.+=((SizesGroup.counter, Sizes(SizesGroup.counter, data, separator, ignore)))
