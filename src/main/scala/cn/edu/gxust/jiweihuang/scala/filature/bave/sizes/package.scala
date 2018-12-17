@@ -53,11 +53,11 @@ package object sizes {
       val tem: ArrayBuffer[Double] = new ArrayBuffer[Double]()
       if (ignore) {
         for (d <- data) yield {
-          if (parse[Double](d.trim) != None) tem.+=(parse[Double](d.trim).get)
+          if (parse[Double](d.trim).isDefined) tem.+=(parse[Double](d.trim).get)
         }
       } else {
         for (d <- data) yield {
-          if (parse[Double](d.trim) == None) throw new RuntimeException(s"The parameter {$d} can not be cast to double.")
+          if (parse[Double](d.trim).isEmpty) throw new RuntimeException(s"The parameter {$d} can not be cast to double.")
           else tem.+=(parse[Double](d.trim).get)
         }
       }
@@ -70,8 +70,8 @@ package object sizes {
       val dataSplited = data.split(separator)
       if (dataSplited == null) throw new RuntimeException(s"Expected {data.split(separator)} not be null. ")
       if (dataSplited.length < 3) throw new RuntimeException(s"Expected {data.split(separator).length} is greater than or equals to 3,but got {${dataSplited.length}}.")
-      val id: Int = if (parse[Int](dataSplited(0).trim) == None) throw new RuntimeException(s"The {${dataSplited(0)}} can not be cast to double.") else parse[Int](dataSplited(0).trim).get
-      val data1 = for (i <- 1 to dataSplited.length - 1) yield {
+      val id: Int = if (parse[Int](dataSplited(0).trim).isEmpty) throw new RuntimeException(s"The {${dataSplited(0)}} can not be cast to double.") else parse[Int](dataSplited(0).trim).get
+      val data1 = for (i <- 1 until dataSplited.length) yield {
         dataSplited(i)
       }
       apply(id, data1.toArray, ignore)
@@ -97,14 +97,14 @@ package object sizes {
     def apply(id: Int): Sizes = get(id)
 
     def get(id: Int): Sizes = {
-      if (sizesMap.keySet.contains(id)) sizesMap.get(id).get
-      else throw new IllegalArgumentException(s"The parameter {id:Int = ${id}} is not in this sizes group.")
+      if (sizesMap.keySet.contains(id)) sizesMap(id)
+      else throw new IllegalArgumentException(s"The parameter {id:Int = $id} is not in this sizes group.")
     }
 
     override def toString: String = {
       var tem: String = "\n"
       sizesMap.foreach(s => tem = tem + s + "\n")
-      s"SizesGroup($name)${tem}"
+      s"SizesGroup($name)$tem"
     }
   }
 
