@@ -8,11 +8,14 @@ import scala.collection.mutable.ArrayBuffer
 
 package object sizes {
 
-  class Sizes(val id: Int, private val data: List[Double]) extends mutable.Iterable[Double] {
+  class Sizes(val id: Int, private val data: List[Double])
+    extends Iterable[Double] {
+    //Ensure the parameter {d:Int>=0}.
     if (id < 0) throw new IllegalArgumentException(
-      s"Expected the parameter {id:Int} is equal or greater than 0,but got {id=$id}.")
+      s"Expected the parameter {id:Int} is equal or greater than 0, but got {id=$id}.")
+    //Ensure the parameter {data.length >=2}.
     if (data.length < 2) throw new IllegalArgumentException(
-      s"Expected the parameter {data:List[Double]} of which length is equal or greater than 2,but got {data.length = ${data.length}}")
+      s"Expected the parameter {data:List[Double]} of which length is equal or greater than 2, but got {data.length = ${data.length}}")
 
     /** The length of sizes */
     def length: Int = data.length
@@ -133,6 +136,20 @@ package object sizes {
       sum
     }
 
+    override def canEqual(other: Any): Boolean = other.isInstanceOf[Sizes]
+
+    override def equals(other: Any): Boolean = other match {
+      case that: Sizes =>
+        (that canEqual this) &&
+          id == that.id &&
+          data == that.data
+      case _ => false
+    }
+
+    override def hashCode(): Int = {
+      val state = Seq(id, data)
+      state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
+    }
   }
 
 
@@ -174,6 +191,14 @@ package object sizes {
       if (arg == null) None
       else Some(arg.id, arg.data)
     }
+
+    val TEST10010Average: Sizes = Sizes(1001, "2.77 3.16 3.24 3.25 3.24 3.05 3.02 2.60 2.35 2.01 1.81 1.71", "\\s+", ignore = false)
+    val TEST10030Average: Sizes = Sizes(1002, "2.44 2.75 2.90 2.86 2.72 2.57 2.50 2.11 1.93 1.75 1.59", "\\s+", ignore = false)
+    val ZJJX10050Average: Sizes = Sizes(1003, "3.53 3.50 3.33 3.15 2.88 2.58 2.27 1.95 1.77 1.55 1.80 1.48", "\\s+", ignore = false)
+    val GXHX10050Average: Sizes = Sizes(1004, "3.72 3.84 3.75 3.62 3.38 3.06 2.56 2.14 1.87 1.72 1.07", "\\s+", ignore = false)
+    val GXLC50210Average: Sizes = Sizes(1005, "3.17 	3.29 	3.33 	3.26 	3.17 	3.00 	2.84 	2.58 	2.36 	2.10 	1.90 	1.71 	1.58 	1.44 	1.33 	1.30 	1.29 	1.23 	1.26 	1.17", "\\s+", ignore = false)
+    val GXRA50200Average: Sizes = Sizes(1006, "2.89 	3.03 	3.05 	2.99 	2.89 	2.78 	2.60 	2.41 	2.13 	1.91 	1.66 	1.51 	1.34 	1.25 	1.14 	1.11 	1.10 	1.08 	0.85 	1.53", "\\s+", ignore = false)
+
   }
 
   class SizesGroup(val name: String) extends mutable.Iterable[Sizes] {
@@ -413,7 +438,7 @@ package object sizes {
 
     val TEST10010: SizesGroup = SizesGroup("TEST10010",
       "2.91	3.17	3.38	3.14	3.07	3.25	3.02	2.82	2.66	2.17	2.11",
-      "3.01	3.01	3.23	3.42	3.72	3.5	3.5	2.25	2.82	2.61	2.24	2.71",
+      "3.01	3.01	3.23	3.42	3.72	3.5	3.5	2.25	2.82	2.61	2.24	1.71",
       "3.28	3.86	4.02	3.94	3.7	3.46	3.46	2.9	2.27	2.06	1.82",
       "2.9	3.3	3.28	3.21	3.12	2.98	2.98	2.7	2.29	1.99	1.84",
       "2.28	3.27	3.22	3.1	3.17	2.75	2.75	2.38	2.34	2.06",
@@ -943,7 +968,7 @@ package object sizes {
       "3.54	3.59	3.13	3.09	2.77	2.7	2.49	2.45	2.01	2.06	1.99	1.88	1.78	1.6	1.37	1.07",
       "3.56	3.27	3.84	3.24	3.84	3.25	3.59	3.06	3.09	2.35	2.28	1.85	1.83	2.17	1.72	1.42",
       "3.27	3.91	3.59	4	3.29	3.91	3.45	3.64	2.88	2.92	2.38	1.6",
-      "2.95	2.67	2.77	3.06	2.84	2.81	2.81	2.81	2.38	2.67	2.1	2.36	1.99	2.2	1.83	1.96	1.6	1.74	1.49	1.53",
+      "2.95	2.67	2.77	3.06	2.84	2.81	2.81	2.81	2.38	2.67	2.1	2.36	1.99	2.2	1.83	1.96	1.6	1.74	1.49",
       "2.95	3.32	3.59	3.34	3.45	2.81	3.06	2.68	2.31	1.81	1.9	1.53",
       "2.33	2.45	2.9	3.02	2.79	2.84	2.74	2.67	2.44	2.35	2.13	2.13	2.01	1.99	1.9	1.87	1.78	1.81	1.28",
       "2.77	3.24	3.8	3.8	3.84	3.54	3.31	2.67	2.06	1.88	1.39	1.3",
