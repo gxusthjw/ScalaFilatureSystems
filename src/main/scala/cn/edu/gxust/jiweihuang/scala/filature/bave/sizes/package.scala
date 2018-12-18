@@ -2,33 +2,117 @@ package cn.edu.gxust.jiweihuang.scala.filature.bave
 
 import cn.edu.gxust.jiweihuang.scala.utils._
 import org.hipparchus.linear._
-
+import scala.math._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 package object sizes {
 
-  class Sizes(val id: Int, private val data: List[Double]) {
-    if (id < 0) throw new IllegalArgumentException(s"Expected the parameter {id:Int} is equal or greater than 0,but got {id=$id}.")
-    if (data.length < 2) throw new IllegalArgumentException(s"Expected the parameter {data:List[Double]} of which length is equal or greater than 2,but got {data.length = ${data.length}}")
+  class Sizes(val id: Int, private val data: List[Double]) extends mutable.Iterable[Double] {
+    if (id < 0) throw new IllegalArgumentException(
+      s"Expected the parameter {id:Int} is equal or greater than 0,but got {id=$id}.")
+    if (data.length < 2) throw new IllegalArgumentException(
+      s"Expected the parameter {data:List[Double]} of which length is equal or greater than 2,but got {data.length = ${data.length}}")
 
+    /** The length of sizes */
     def length: Int = data.length
 
+    /** The initial size of sizes */
+    def initial: Double = data.head
+
+    /** The terminal size of sizes */
+    def terminal: Double = data.last
+
+    /** The maximal size of sizes */
+    def max: Double = data.max
+
+    /** The index of maximal size in sizes */
+    def maxIndex: Int = {
+      var make_index: Int = 0
+      for (i <- 0 until length) {
+        if (data(i) == max) make_index = i
+      }
+      make_index
+    }
+
+    /** The minimal size of sizes */
+    def min: Double = data.min
+
+    /** The index of minimal size in sizes */
+    def minIndex: Int = {
+      var make_index: Int = 0
+      for (i <- 0 until length) {
+        if (data(i) == min) make_index = i
+      }
+      make_index
+    }
+
+    /** The sum of sizes */
     def sum: Double = data.sum
 
+    /** The average of sizes */
     def average: Double = sum / length
+
+    /** The sum of squares of sizes */
+    def sumsq: Double = {
+      var make_sum = 0.0
+      for (d <- data) make_sum = make_sum + pow(d, 2.0)
+      make_sum
+    }
+
+    /** The sum of squares of deviations of sizes */
+    def devsq: Double = {
+      var make_sum = 0.0
+      for (d <- data) make_sum = make_sum + pow(d - average, 2.0)
+      make_sum
+    }
+
+    /** The variance of sizes */
+    def vari: Double = devsq / length
+
+    /** The variance of sizes which be as sample */
+    def varis: Double = devsq / (length - 1)
+
+    /** The variance of sizes which be as population */
+    def varip: Double = devsq / length
+
+    /** standard deviation of sizes */
+    def std: Double = sqrt(vari)
+
+    /** standard deviation of sizes which be as sample  */
+    def stds: Double = sqrt(varis)
+
+    /** standard deviation of sizes which be as population  */
+    def stdp: Double = sqrt(varip)
+
+    /** The variance of sizes which be calculated by simplified approach */
+    def vari2: Double = (sumsq - length * pow(average, 2)) / length
+
+    /**
+      * This method is attend to be indexer.
+      * for example:
+      * {{{
+      *   val sizes = new Sizes(0,2.5::2.7::3.0::2.9::2.8::2.6::2.4::2.3::2.2::Nil)
+      *
+      *   println(sizes(0)=${sizes(0)}    --->   sizes(0) = 2.5
+      * }}}
+      */
+    def apply(index: Int): Double = data(index)
 
     override def toString: String = s"Sizes($id,$data)"
 
-    def apply(index: Int): Double = data(index)
+    override def iterator: Iterator[Double] = data.iterator
 
-    //Stepwise auto-regressive model
+    //The following methods are derived from stepwise auto-regressive model
+    //Reference:
+    /** The slope of regression straight line */
     def slope: Double = {
       var sum: Double = 0.0
       for (i <- 0 until length) sum = sum + i * data(i)
       (12.0 * sum - 6.0 * (length - 1.0) * average * length) / ((length - 1.0) * length * (length + 1.0))
     }
 
+    /** The regression straight line */
     def line: List[Double] = {
       val make_array = new Array[Double](length)
       for (i <- 0 until length) {
@@ -37,14 +121,15 @@ package object sizes {
       make_array.toList
     }
 
-    def subLine: List[Double] = {
+    /** The difference value between sizes and line */
+    def differWithLine: List[Double] = {
       (for (i <- 0 until length) yield data(i) - line(i)).toList
     }
 
-    //Auto-covariance Function
+    /** Auto-covariance Function */
     def acvf(r: Int, m: Int): Double = {
       var sum: Double = 0
-      for (i <- 0 until length - m) sum = sum + subLine(i) * subLine(i + r)
+      for (i <- 0 until length - m) sum = sum + differWithLine(i) * differWithLine(i + r)
       sum
     }
 
@@ -52,6 +137,7 @@ package object sizes {
 
 
   object Sizes {
+
     def apply(id: Int, data: Double*): Sizes = new Sizes(id, data.toList)
 
     def apply(id: Int, data: Array[Double]): Sizes = new Sizes(id, data.toList)
@@ -91,7 +177,9 @@ package object sizes {
   }
 
   class SizesGroup(val name: String) extends mutable.Iterable[Sizes] {
+
     private val sizesMap = new mutable.TreeMap[Int, Sizes]()
+
     SizesGroup.counter = 0
 
     def count: Int = sizesMap.size
@@ -117,31 +205,37 @@ package object sizes {
 
     override def iterator: Iterator[Sizes] = sizesMap.valuesIterator
 
-    //Auto-covariance Function
+    //The following methods are derived from stepwise auto-regressive model
+    //Reference:
+    /** Auto-covariance function */
     def acvf(r: Int, m: Int): Double = {
       var sum: Double = 0.0
       for (sizes <- this) sum = sum + sizes.acvf(r, m)
       sum / count
     }
 
-    def acvfStringArray(k: Int): Array[String] = {
+    /** The string array {{{Array[String]}}} of auto-covariance vector */
+    def acvvStringArray(k: Int): Array[String] = {
       val make_array = new Array[String](k)
       for (i <- 1 to k) make_array(i - 1) = s"acvf($i, $i)"
       make_array
     }
 
-    def acvfArray(k: Int): Array[Double] = {
+    /** The double array {{{Array[Double]}}} of auto-covariance vector */
+    def acvvArray(k: Int): Array[Double] = {
       val make_array = new Array[Double](k)
       for (i <- 1 to k) make_array(i - 1) = acvf(i, i)
       make_array
     }
 
-    def acvfVector(k: Int): RealVector = new ArrayRealVector(acvfArray(k), false)
+    /** The vector {{{RealVector}}} of auto-covariance vector */
+    def acvvVector(k: Int): RealVector = new ArrayRealVector(acvvArray(k), false)
 
-    def acvfStringMatrix(k: Int): Array[Array[String]] = {
+    /** The 2d string array {{{Array[Array[String]]}}} of auto-covariance matrix */
+    def acvmString2DArray(k: Int): Array[Array[String]] = {
       val dm = Array.ofDim[String](k, k)
-      for (i <- 0 to k - 1) {
-        for (j <- i to k - 1) {
+      for (i <- 0 until k) {
+        for (j <- i until k) {
           dm(i)(j) = s"acvf(${j - i}, ${j + 1})"
         }
         for (h <- 0 until i) {
@@ -151,7 +245,8 @@ package object sizes {
       dm
     }
 
-    def acvf2DArray(k: Int): Array[Array[Double]] = {
+    /** The 2d double array {{{Array[Array[Double]]}}} of auto-covariance matrix */
+    def acvm2DArray(k: Int): Array[Array[Double]] = {
       val make_2darray = Array.ofDim[Double](k, k)
       for (i <- 0 until k) {
         for (j <- i until k) {
@@ -164,15 +259,18 @@ package object sizes {
       make_2darray
     }
 
-    def acvfMatrix(k: Int): RealMatrix = new Array2DRowRealMatrix(acvf2DArray(k), false)
+    /** The matrix {{{RealMatrix}}} of auto-covariance matrix */
+    def acvmMatrix(k: Int): RealMatrix = new Array2DRowRealMatrix(acvm2DArray(k), false)
 
+    /** The coefficient {{{RealVector}}}of stepwise auto-regressive */
     def coefVector(k: Int): RealVector = {
-      val coefficients = acvfMatrix(k)
-      val constants = acvfVector(k)
-      val solver: DecompositionSolver = new LUDecomposition(coefficients).getSolver()
+      val coefficients = acvmMatrix(k)
+      val constants = acvvVector(k)
+      val solver: DecompositionSolver = new LUDecomposition(coefficients).getSolver
       solver.solve(constants)
     }
 
+    /** The coefficient array {{{Array[Double]}}}of stepwise auto-regressive */
     def coefArray(k: Int): Array[Double] = {
       val make_array = new Array[Double](k)
       val coef_vector = coefVector(k)
@@ -182,9 +280,16 @@ package object sizes {
   }
 
   object SizesGroup {
+
     private var counter: Int = 0
 
     def apply(name: String, data: String*): SizesGroup = {
+      val sg = new SizesGroup(name)
+      data.foreach(d => sg += d)
+      sg
+    }
+
+    def apply(name: String, data: Array[String]): SizesGroup = {
       val sg = new SizesGroup(name)
       data.foreach(d => sg += d)
       sg
