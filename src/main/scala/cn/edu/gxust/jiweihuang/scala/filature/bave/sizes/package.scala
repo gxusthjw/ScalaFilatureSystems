@@ -205,6 +205,117 @@ package object sizes {
 
     override def iterator: Iterator[Sizes] = sizesMap.valuesIterator
 
+    //The Statistical characteristic for sizes group
+    def sizeCount: Int = {
+      var make_sum: Int = 0
+      for (sizes <- this) make_sum = make_sum + sizes.length
+      make_sum
+    }
+
+    def sum: Double = {
+      var make_sum: Double = 0.0
+      for (sizes <- this) make_sum = make_sum + sizes.sum
+      make_sum
+    }
+
+    def average: Double = sum / sizeCount
+
+    def vari: Double = {
+      variW + variB
+    }
+
+    def variW: Double = {
+      var make_sum: Double = 0.0
+      for (sizes <- this) make_sum = make_sum + sizes.vari * sizes.length
+      make_sum / sizeCount
+    }
+
+    def variB: Double = {
+      var make_sum: Double = 0.0
+      for (sizes <- this) make_sum = make_sum + pow(sizes.average - average, 2.0) * sizes.length
+      make_sum / sizeCount
+    }
+
+    def std: Double = sqrt(vari)
+
+    def stdW: Double = sqrt(variW)
+
+    def stdB: Double = sqrt(variB)
+
+    def lengthAverage: Double = sizeCount / count
+
+    def lengthVari: Double = {
+      var make_sum = 0.0
+      for (sizes <- this) make_sum = make_sum + pow(sizes.length - lengthAverage, 2.0)
+      make_sum / count
+    }
+
+    def lengthStd: Double = sqrt(lengthVari)
+
+    def initialAverage: Double = {
+      var make_sum = 0.0
+      for (sizes <- this) make_sum = make_sum + sizes.initial
+      make_sum / count
+    }
+
+    def initialVari: Double = {
+      var make_sum = 0.0
+      for (sizes <- this) make_sum = make_sum + pow(sizes.initial - initialAverage, 2.0)
+      make_sum / count
+    }
+
+    def initialStd: Double = sqrt(initialVari)
+
+    def terminalAverage: Double = {
+      var make_sum = 0.0
+      for (sizes <- this) make_sum = make_sum + sizes.terminal
+      make_sum / count
+    }
+
+    def terminalVari: Double = {
+      var make_sum = 0.0
+      for (sizes <- this) make_sum = make_sum + pow(sizes.terminal - terminalAverage, 2.0)
+      make_sum / count
+    }
+
+    def terminalStd: Double = sqrt(terminalVari)
+
+    def slopeAverage: Double = {
+      var make_sum = 0.0
+      for (sizes <- this) make_sum = make_sum + sizes.slope
+      make_sum / count
+    }
+
+    def slopeVari: Double = {
+      var make_sum = 0.0
+      for (sizes <- this) make_sum = make_sum + pow(sizes.slope - slopeAverage, 2.0)
+      make_sum / count
+    }
+
+    def slopeStd: Double = sqrt(slopeVari)
+
+    def averageAverage: Double = {
+      var make_sum = 0.0
+      for (sizes <- this) make_sum = make_sum + sizes.average
+      make_sum / count
+    }
+
+    def averageVari: Double = {
+      var make_sum = 0.0
+      for (sizes <- this) make_sum = make_sum + pow(sizes.average - averageAverage, 2.0)
+      make_sum / count
+    }
+
+    def averageStd: Double = sqrt(averageVari)
+
+    def covariSS: Double = {
+      var make_sum = 0.0
+      for (sizes <- this) make_sum = make_sum + (sizes.average - average) * (sizes.slope - slopeAverage)
+      make_sum / count
+    }
+
+    def corSS: Double = covariSS / (averageStd * slopeStd)
+
     //The following methods are derived from stepwise auto-regressive model
     //Reference:
     /** Auto-covariance function */
