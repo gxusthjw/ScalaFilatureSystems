@@ -190,6 +190,11 @@ package object sizes {
       this
     }
 
+    def update(sizes: Sizes): SizesGroup = {
+      sizesMap.+=((sizes.id, sizes))
+      this
+    }
+
     def apply(id: Int): Sizes = get(id)
 
     def get(id: Int): Sizes = {
